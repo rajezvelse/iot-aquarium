@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Start Aquarium-IOT
+Comment=Script to manage the Aquarium
+Exec=/bin/bash start.sh
+Icon=utilities-terminal
+Terminal=True
+Type=Application
+Categories=Application;
