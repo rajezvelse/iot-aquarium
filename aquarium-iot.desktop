@@ -2,7 +2,7 @@
 Version=1.0
 Name=Start Aquarium-IOT
 Comment=Script to manage the Aquarium
-Exec=lxterminal -e bash -c 'cd /media/pi/PENDRIVE8GB/iot-aquarium/lib; python aquarium_iot.py; bash'
+Exec=lxterminal -e bash -c 'cd /home/pi/iot/lib; python3 aquarium_iot.py; bash'
 Icon=utilities-terminal
 Terminal=True
 Type=Application

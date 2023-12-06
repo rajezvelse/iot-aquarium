@@ -29,6 +29,8 @@ LIGHT_SWITCH = SWITCH_2
 CO2_SWITCH = SWITCH_3
 FEEDER_SERVO = SERVO_1
 
+APP_DIR = "/home/pi/iot/"
+
 tasks = []
 
 
@@ -38,7 +40,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.FileHandler(
-            "logs/aquarium_iot_%d_%d_%d.log" % (today.year, today.month, today.day)
+           APP_DIR + "logs/aquarium_iot_%d_%d_%d.log" % (today.year, today.month, today.day)
         ),
         logging.StreamHandler(),
     ],
@@ -90,7 +92,8 @@ def init_feeding_sequence():
 
     log("Starting to feed")
     servo_360(FEEDER_SERVO)
-    f = open("status.json", "r+")
+    global APP_DIR
+    f = open(APP_DIR + "status.json", "r+")
     status = json.load(f)
     status["last_feed_time"] = datetime.now().replace(microsecond=0).isoformat()
     f.seek(0)
@@ -104,6 +107,37 @@ def init_feeding_sequence():
     log("Power on the Filter")
     off(FILTER_SWITCH)
 
+def switch_on_co2():
+    log("Switching on Co2")
+    on(CO2_SWITCH)
+
+def switch_off_co2():
+    log("Switching off Co2")
+    off(CO2_SWITCH)
+
+def switch_on_light():
+    log("Switching on light")
+    on(LIGHT_SWITCH)
+
+def switch_off_light():
+    log("Switching off light")
+    off(LIGHT_SWITCH)
+
+def start_food_feed():
+    global APP_DIR
+    f = open(APP_DIR + "status.json", "r")
+    status = json.load(f)
+    f.close()
+
+    log("Last feed processed at: %s" % (status["last_feed_time"],))
+    last_feed_time = datetime.strptime(status["last_feed_time"], "%Y-%m-%dT%H:%M:%S")
+    now = datetime.now()
+    if divmod((now - last_feed_time).total_seconds(), 3600)[0] < 8:
+        log("More frequent to feed. skipping now")
+        return
+    
+    init_feeding_sequence()
+    
 
 def clean():
     log("Cleaning all GPIO config...")
@@ -134,8 +168,7 @@ def main():
     co2_off_h = int(co2_off_h)
     co2_off_time = datetime(now.year, now.month, now.day, co2_off_h, co2_on_m, 0)
     if now >= co2_on_time and now < co2_off_time:
-        log("Switching on Co2")
-        on(CO2_SWITCH)
+        switch_on_co2()
     elif now < co2_on_time:
         log("Scheduling switching on timer for Co2")
         t = delayed_process((co2_on_time - now).seconds, target=lambda: on(CO2_SWITCH))
@@ -172,7 +205,8 @@ def main():
     t.start()
 
     # Manage feeding
-    f = open("status.json", "r")
+    global APP_DIR
+    f = open(APP_DIR + "status.json", "r")
     status = json.load(f)
     f.close()
 
