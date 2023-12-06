@@ -4,6 +4,9 @@ from datetime import datetime
 import multiprocessing
 import json
 import os
+import math
+import logging
+
 
 # GPIO PIN config
 SWITCH_1 = 17
@@ -14,30 +17,55 @@ SERVO_1 = 24
 
 # Schedule times
 FEEDING_TIMES = [8, 18]
-FEEDING_BUFFER = 2 # Hours
+FEEDING_BUFFER = 2  # Hours
 LIGHT_ON_TIME = 13
 LIGHT_OFF_TIME = 21
 
+CO2_ON_TIME = 11.30
+CO2_OFF_TIME = 20
+
 FILTER_SWITCH = SWITCH_1
 LIGHT_SWITCH = SWITCH_2
+CO2_SWITCH = SWITCH_3
 FEEDER_SERVO = SERVO_1
 
 tasks = []
 
+
+today = datetime.now()
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(
+            "logs/aquarium_iot_%d_%d_%d.log" % (today.year, today.month, today.day)
+        ),
+        logging.StreamHandler(),
+    ],
+)
+logger = logging.getLogger()
+
+
 def log(msg):
+    global logger
     now = datetime.now().isoformat()
-    print("[%s] %s" % (now, msg))
+    # print("[%s] %s" % (now, msg))
+    logger.info(msg)
+
 
 def setup():
     GPIO.setmode(GPIO.BCM)
 
+
 def on(pin):
     log("Switching on")
     GPIO.setup(pin, GPIO.OUT)
+    # GPIO.output(pin, 1)
 
 
 def off(pin):
     log("Switching off")
+    # GPIO.output(pin, 0)
     GPIO.setup(pin, GPIO.IN)
 
 
@@ -49,8 +77,9 @@ def servo_360(pin):
     p.start(0)  # Starts running PWM on the pin and sets it to 0
 
     p.ChangeDutyCycle(7.4)
-    sleep(2.1)
+    sleep(2.2)
     p.stop()
+    GPIO.setup(pin, GPIO.IN)
 
 
 def init_feeding_sequence():
@@ -63,8 +92,10 @@ def init_feeding_sequence():
     servo_360(FEEDER_SERVO)
     f = open("status.json", "r+")
     status = json.load(f)
-    status['last_feed_time'] = datetime.now().replace(microsecond=0).isoformat()
+    status["last_feed_time"] = datetime.now().replace(microsecond=0).isoformat()
+    f.seek(0)
     json.dump(status, f)
+    f.truncate()
     f.close()
 
     log("Waiting for the feed consumption (15 mins)")
@@ -73,9 +104,11 @@ def init_feeding_sequence():
     log("Power on the Filter")
     off(FILTER_SWITCH)
 
+
 def clean():
     log("Cleaning all GPIO config...")
     GPIO.cleanup()
+
 
 def delayed_process(interval, target, *args, **kwargs):
     def d_func(**kwargs):
@@ -89,7 +122,33 @@ def main():
     global tasks
     now = datetime.now()
     current_hour = now.hour
-    
+
+    # Manage Co2
+    co2_on_m, co2_on_h = math.modf(CO2_ON_TIME)
+    co2_on_m = int(co2_on_m * 100)
+    co2_on_h = int(co2_on_h)
+    co2_on_time = datetime(now.year, now.month, now.day, co2_on_h, co2_on_m, 0)
+
+    co2_off_m, co2_off_h = math.modf(CO2_OFF_TIME)
+    co2_off_m = int(co2_off_m * 100)
+    co2_off_h = int(co2_off_h)
+    co2_off_time = datetime(now.year, now.month, now.day, co2_off_h, co2_on_m, 0)
+    if now >= co2_on_time and now < co2_off_time:
+        log("Switching on Co2")
+        on(CO2_SWITCH)
+    elif now < co2_on_time:
+        log("Scheduling switching on timer for Co2")
+        t = delayed_process((co2_on_time - now).seconds, target=lambda: on(CO2_SWITCH))
+        tasks.append(t)
+        t.start()
+
+    log("Scheduling switching off timer for Co2")
+    light_off_time = datetime(now.year, now.month, now.day, LIGHT_OFF_TIME, 0, 0)
+    t = delayed_process(
+        (light_off_time - now).seconds, target=lambda: off(LIGHT_SWITCH)
+    )
+    tasks.append(t)
+    t.start()
 
     # Manage lighting
     if current_hour >= LIGHT_ON_TIME and current_hour < LIGHT_OFF_TIME:
@@ -97,15 +156,18 @@ def main():
         on(LIGHT_SWITCH)
     elif current_hour < LIGHT_ON_TIME:
         log("Scheduling switching on timer for light")
-        light_on_time = datetime(now.year, now.month, now.day, LIGHT_ON_TIME, 0, 0) 
-        t = delayed_process((light_on_time-now).seconds, target=lambda: on(LIGHT_SWITCH))
+        light_on_time = datetime(now.year, now.month, now.day, LIGHT_ON_TIME, 0, 0)
+        t = delayed_process(
+            (light_on_time - now).seconds, target=lambda: on(LIGHT_SWITCH)
+        )
         tasks.append(t)
         t.start()
 
-
     log("Scheduling switching off timer for light")
-    light_off_time = datetime(now.year, now.month, now.day, LIGHT_OFF_TIME, 0, 0) 
-    t = delayed_process((light_off_time-now).seconds, target=lambda: off(LIGHT_SWITCH))
+    light_off_time = datetime(now.year, now.month, now.day, LIGHT_OFF_TIME, 0, 0)
+    t = delayed_process(
+        (light_off_time - now).seconds, target=lambda: off(LIGHT_SWITCH)
+    )
     tasks.append(t)
     t.start()
 
@@ -114,20 +176,21 @@ def main():
     status = json.load(f)
     f.close()
 
-    last_feed_time = datetime.strptime(status['last_feed_time'], "%Y-%m-%dT%H:%M:%S")
+    last_feed_time = datetime.strptime(status["last_feed_time"], "%Y-%m-%dT%H:%M:%S")
 
     for feed_time in FEEDING_TIMES:
         if feed_time > current_hour:
             log("scheduling feeding at hour : %d" % (feed_time,))
-            f_time = datetime(now.year, now.month, now.day, feed_time, 0, 0) 
-            t = delayed_process((f_time-now).seconds, target=init_feeding_sequence)
+            f_time = datetime(now.year, now.month, now.day, feed_time, 0, 0)
+            t = delayed_process((f_time - now).seconds, target=init_feeding_sequence)
             tasks.append(t)
             t.start()
         elif current_hour - feed_time <= FEEDING_BUFFER:
-            if current_hour - last_feed_time.hour < 8:
-                log("Last feed processed at: %s. Skipping now" % (status['last_feed_time'],))
+            log("Last feed processed at: %s" % (status["last_feed_time"],))
+            if divmod((now - last_feed_time).total_seconds(), 3600)[0] < 8:
+                log("Skipping now")
                 continue
-            
+
             log("Starting immediate feeding")
             t = multiprocessing.Process(target=init_feeding_sequence)
             tasks.append(t)
@@ -139,17 +202,17 @@ def main():
         tasks = list(filter(lambda t: t.is_alive(), tasks))
         log("Checked tasks status")
 
+
 if __name__ == "__main__":
     setup()
     try:
         main()
     except KeyboardInterrupt:
-        
-        log('Interrupted')
+        log("Interrupted")
         for t in tasks:
             if t.is_alive():
                 t.terminate()
-                
+
         # os.system("sudo reboot")
     finally:
         clean()
