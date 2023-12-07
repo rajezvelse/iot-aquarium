@@ -18,8 +18,9 @@ if __name__ == "__main__":
     
     try:
         for schedule in schedules:
+            t, fn = schedule
             now = datetime.now()
-            m, h = math.modf(schedule[0])
+            m, h = math.modf(t)
             m = int(m * 100)
             h = int(h)
             time = datetime(now.year, now.month, now.day, h, m, 0)
@@ -27,7 +28,7 @@ if __name__ == "__main__":
             if not (now <= time < now + timedelta(minutes=30)):
                 continue
 
-            schedule(1)()
+            fn()
 
         
         aiot.log("Finished cron")
