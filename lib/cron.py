@@ -43,7 +43,9 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         aiot.log("Interrupted")
+        
+        aiot.clean()
 
         # os.system("sudo reboot")
-    finally:
-        aiot.clean()
+    #finally:
+        # aiot.clean()
