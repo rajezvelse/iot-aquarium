@@ -41,10 +41,10 @@ if __name__ == "__main__":
         
         aiot.log("Finished cron")
 
-    except KeyboardInterrupt:
-        aiot.log("Interrupted")
+    except Exception as e:
+        aiot.log("Error: %s" e)
         
-        aiot.clean()
+        # aiot.clean()
 
         # os.system("sudo reboot")
     #finally:
