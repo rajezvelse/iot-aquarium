@@ -42,7 +42,7 @@ if __name__ == "__main__":
         aiot.log("Finished cron")
 
     except Exception as e:
-        aiot.log("Error: %s" e)
+        aiot.log("Error: " + str(e))
         
         # aiot.clean()
 

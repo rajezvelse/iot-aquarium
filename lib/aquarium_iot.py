@@ -40,7 +40,8 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.FileHandler(
-           APP_DIR + "logs/aquarium_iot_%d_%d_%d.log" % (today.year, today.month, today.day)
+            APP_DIR
+            + "logs/aquarium_iot_%d_%d_%d.log" % (today.year, today.month, today.day)
         ),
         logging.StreamHandler(),
     ],
@@ -54,12 +55,14 @@ def log(msg):
     # print("[%s] %s" % (now, msg))
     logger.info(msg)
 
+
 def get_dt(t):
     now = datetime.now()
     m, h = math.modf(t)
     m = int(m * 100)
     h = int(h)
     return datetime(now.year, now.month, now.day, h, m, 0)
+
 
 def get_previous_state(name):
     global APP_DIR
@@ -71,12 +74,13 @@ def get_previous_state(name):
         return datetime.strptime(status[name], "%Y-%m-%dT%H:%M:%S")
     else:
         return None
-    
+
+
 def set_previous_state(name, t=None):
     global APP_DIR
     f = open(APP_DIR + "status.json", "r+")
     status = json.load(f)
-    
+
     if not t:
         t = datetime.now()
 
@@ -85,6 +89,7 @@ def set_previous_state(name, t=None):
     json.dump(status, f)
     f.truncate()
     f.close()
+
 
 def setup():
     GPIO.setmode(GPIO.BCM)
@@ -112,6 +117,7 @@ def servo_360(pin):
     p.ChangeDutyCycle(7.4)
     sleep(2.2)
     p.stop()
+    sleep(5)
     GPIO.setup(pin, GPIO.IN)
 
 
@@ -123,8 +129,8 @@ def init_feeding_sequence():
 
     log("Starting to feed")
     servo_360(FEEDER_SERVO)
-    
-    set_previous_state('last_feed_time')
+
+    set_previous_state("last_feed_time")
 
     log("Waiting for the feed consumption (15 mins)")
     sleep(15 * 60)  # minutes
@@ -132,21 +138,26 @@ def init_feeding_sequence():
     log("Power on the Filter")
     off(FILTER_SWITCH)
 
+
 def switch_on_co2():
     log("Switching on Co2")
     on(CO2_SWITCH)
+
 
 def switch_off_co2():
     log("Switching off Co2")
     off(CO2_SWITCH)
 
+
 def switch_on_light():
     log("Switching on light")
     on(LIGHT_SWITCH)
 
+
 def switch_off_light():
     log("Switching off light")
     off(LIGHT_SWITCH)
+
 
 def start_food_feed():
     global APP_DIR
@@ -160,9 +171,9 @@ def start_food_feed():
     if divmod((now - last_feed_time).total_seconds(), 3600)[0] < 8:
         log("More frequent to feed. skipping now")
         return
-    
+
     init_feeding_sequence()
-    
+
 
 def clean():
     log("Cleaning all GPIO config...")
