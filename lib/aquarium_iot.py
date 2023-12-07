@@ -120,7 +120,7 @@ def servo_360(pin):
     p.start(0)  # Starts running PWM on the pin and sets it to 0
 
     p.ChangeDutyCycle(7.4)
-    sleep(2.2)
+    sleep(2.1)
     p.stop()
     sleep(5)
     GPIO.setup(pin, GPIO.IN)
