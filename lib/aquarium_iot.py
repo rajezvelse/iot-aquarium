@@ -54,6 +54,37 @@ def log(msg):
     # print("[%s] %s" % (now, msg))
     logger.info(msg)
 
+def get_dt(t):
+    now = datetime.now()
+    m, h = math.modf(t)
+    m = int(m * 100)
+    h = int(h)
+    return datetime(now.year, now.month, now.day, h, m, 0)
+
+def get_previous_state(name):
+    global APP_DIR
+    f = open(APP_DIR + "status.json", "r")
+    status = json.load(f)
+    f.close()
+
+    if status.get(name, None):
+        return datetime.strptime(status[name], "%Y-%m-%dT%H:%M:%S")
+    else:
+        return None
+    
+def set_previous_state(name, t):
+    global APP_DIR
+    f = open(APP_DIR + "status.json", "r+")
+    status = json.load(f)
+    
+    if not t:
+        t = datetime.now()
+
+    status[name] = t.replace(microsecond=0).isoformat()
+    f.seek(0)
+    json.dump(status, f)
+    f.truncate()
+    f.close()
 
 def setup():
     GPIO.setmode(GPIO.BCM)
@@ -92,14 +123,8 @@ def init_feeding_sequence():
 
     log("Starting to feed")
     servo_360(FEEDER_SERVO)
-    global APP_DIR
-    f = open(APP_DIR + "status.json", "r+")
-    status = json.load(f)
-    status["last_feed_time"] = datetime.now().replace(microsecond=0).isoformat()
-    f.seek(0)
-    json.dump(status, f)
-    f.truncate()
-    f.close()
+    
+    set_previous_state('last_feed_time')
 
     log("Waiting for the feed consumption (15 mins)")
     sleep(15 * 60)  # minutes
