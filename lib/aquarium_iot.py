@@ -72,7 +72,7 @@ def get_previous_state(name):
     else:
         return None
     
-def set_previous_state(name, t):
+def set_previous_state(name, t=None):
     global APP_DIR
     f = open(APP_DIR + "status.json", "r+")
     status = json.load(f)
