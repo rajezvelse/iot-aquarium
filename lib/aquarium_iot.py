@@ -49,11 +49,15 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 
-def log(msg):
+def log(msg, type=None):
     global logger
-    now = datetime.now().isoformat()
-    # print("[%s] %s" % (now, msg))
-    logger.info(msg)
+
+    if type == "error":
+        logger.error(msg)
+    elif type == "debug":
+        logger.debug(msg)
+    else:
+        logger.info(msg)
 
 
 def get_dt(t):
@@ -77,6 +81,7 @@ def get_previous_state(name):
 
 
 def set_previous_state(name, t=None):
+    log("Updating prev state for: " + name)
     global APP_DIR
     f = open(APP_DIR + "status.json", "r+")
     status = json.load(f)
