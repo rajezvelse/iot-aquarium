@@ -1,8 +1,11 @@
 #!/bin/bash
 
 
-cd lib
 
 echo "Starting the script $PWD/feed.py"
 
-PYTHONPATH="$PWD" python feed.py
+export APP_DIR=/home/pi/iot/
+export PYTHONPATH=$APP_DIR
+cd $APP_DIR
+
+python lib/feed.py
