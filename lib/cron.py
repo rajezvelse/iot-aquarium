@@ -32,7 +32,7 @@ if __name__ == "__main__":
             exec_time = aiot.get_dt(t)
             buff_time = aiot.get_dt(buffer)
 
-            eligible = exec_time < buff_time
+            eligible = exec_time > buff_time
             in_next_x_mins = now <= exec_time < now + timedelta(minutes=30)
             in_past = exec_time < now
 
