@@ -1,2 +1,5 @@
 .env
 sandbox
+logs/*
+**/__pycache__*
+client_secrets.json

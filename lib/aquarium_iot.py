@@ -6,6 +6,7 @@ import json
 import os
 import math
 import logging
+import settings
 
 
 # GPIO PIN config
@@ -30,24 +31,13 @@ CO2_SWITCH = SWITCH_3
 FEEDER_SERVO = SERVO_1
 FEEDER_SERVO_SWITCH = SWITCH_4
 
-APP_DIR = "/home/pi/iot/"
+
+config = settings.get_config("sync_log")
+logger = config["logger"]
+APP_DIR = config["app_dir"]
+
 
 tasks = []
-
-
-today = datetime.now()
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler(
-            APP_DIR
-            + "logs/aquarium_iot_%d_%d_%d.log" % (today.year, today.month, today.day)
-        ),
-        logging.StreamHandler(),
-    ],
-)
-logger = logging.getLogger()
 
 
 def log(msg, type=None):
