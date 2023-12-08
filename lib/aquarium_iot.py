@@ -28,6 +28,7 @@ FILTER_SWITCH = SWITCH_1
 LIGHT_SWITCH = SWITCH_2
 CO2_SWITCH = SWITCH_3
 FEEDER_SERVO = SERVO_1
+FEEDER_SERVO_SWITCH = SWITCH_4
 
 APP_DIR = "/home/pi/iot/"
 
@@ -133,7 +134,11 @@ def init_feeding_sequence():
     sleep(10)
 
     log("Starting to feed")
+    on(FEEDER_SERVO_SWITCH)
+    sleep(2)
     servo_360(FEEDER_SERVO)
+    sleep(2)
+    off(FEEDER_SERVO_SWITCH)
 
     set_previous_state("last_feed_time")
 
