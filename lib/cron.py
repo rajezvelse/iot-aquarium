@@ -41,7 +41,7 @@ if __name__ == "__main__":
                 last_execution_time and exec_time <= last_execution_time < buff_time
             )
 
-            if in_next_x_mins or (in_buffer and not already_executed) :
+            if not already_executed and (in_next_x_mins or in_buffer):
                 aiot.log("Executing " + fn_name)
                 fn()
                 aiot.set_previous_state(fn_name, now)
