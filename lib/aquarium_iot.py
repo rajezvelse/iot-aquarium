@@ -32,7 +32,7 @@ FEEDER_SERVO = SERVO_1
 FEEDER_SERVO_SWITCH = SWITCH_4
 
 
-config = settings.get_config("sync_log")
+config = settings.get_config("aquarium_iot")
 logger = config["logger"]
 APP_DIR = config["app_dir"]
 
