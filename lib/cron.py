@@ -38,7 +38,10 @@ if __name__ == "__main__":
 
             last_execution_time = aiot.get_previous_state(fn_name)
             already_executed = (
-                last_execution_time and exec_time <= last_execution_time < buff_time
+                last_execution_time
+                and (exec_time - timedelta(minutes=2))
+                <= last_execution_time
+                < buff_time
             )
 
             if not already_executed and (in_next_x_mins or in_buffer):
