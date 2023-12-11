@@ -17,6 +17,7 @@ SWITCH_4 = 23
 SERVO_1 = 24
 
 # Schedule times
+REBOOT_TIMES = [7, 11, 20.30, 22.30]
 FEEDING_TIMES = [8, 18]
 FEEDING_BUFFER = 2  # Hours
 LIGHT_ON_TIME = 13
@@ -49,6 +50,11 @@ def log(msg, type=None):
         logger.debug(msg)
     else:
         logger.info(msg)
+
+
+def reboot():
+    log("Running reboot")
+    os.system("sudo reboot")
 
 
 def get_dt(t):
@@ -113,7 +119,7 @@ def servo_360(pin):
     p.ChangeDutyCycle(7.4)
     sleep(2.1)
     p.stop()
-    sleep(5)
+    sleep(200 / 1000)  # 100 millisecods
     GPIO.setup(pin, GPIO.IN)
 
 
@@ -125,9 +131,9 @@ def init_feeding_sequence():
 
     log("Starting to feed")
     on(FEEDER_SERVO_SWITCH)
-    sleep(2)
+    sleep(1)
     servo_360(FEEDER_SERVO)
-    sleep(2)
+    sleep(500 / 1000)  # 100 millisecods
     off(FEEDER_SERVO_SWITCH)
 
     set_previous_state("last_feed_time")
