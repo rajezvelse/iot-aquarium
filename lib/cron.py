@@ -18,12 +18,7 @@ schedules = [
         aiot.start_food_feed,
         aiot.FEEDING_TIMES[1] + aiot.FEEDING_BUFFER,
     ),
-    ( 
-        rb_t,
-        aiot.reboot,
-        rb_t + 0.05
-    ) for rb_t in aiot.REBOOT_TIMES
-]
+] + [(rb_t, aiot.reboot, rb_t + 0.05) for rb_t in aiot.REBOOT_TIMES]
 
 if __name__ == "__main__":
     aiot.log("Starting cron")
