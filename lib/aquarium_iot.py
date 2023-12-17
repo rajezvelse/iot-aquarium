@@ -133,6 +133,8 @@ def init_feeding_sequence():
     on(FEEDER_SERVO_SWITCH)
     sleep(1)
     servo_360(FEEDER_SERVO)
+    sleep(5)
+    servo_360(FEEDER_SERVO)
     sleep(500 / 1000)  # 100 millisecods
     off(FEEDER_SERVO_SWITCH)
 
