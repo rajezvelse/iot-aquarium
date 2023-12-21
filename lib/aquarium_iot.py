@@ -17,7 +17,7 @@ SWITCH_4 = 23
 SERVO_1 = 24
 
 # Schedule times
-REBOOT_TIMES = [7, 10, 21.30, 11.30]
+REBOOT_TIMES = [7, 10, 21.30, 23.30]
 FEEDING_TIMES = [8, 18]
 FEEDING_BUFFER = 2  # Hours
 LIGHT_ON_TIME = 13
@@ -117,7 +117,7 @@ def servo_360(pin):
     p.start(0)  # Starts running PWM on the pin and sets it to 0
 
     p.ChangeDutyCycle(7.4)
-    sleep(2.2)
+    sleep(2.3)
     p.stop()
     sleep(200 / 1000)  # 100 millisecods
     GPIO.setup(pin, GPIO.IN)
