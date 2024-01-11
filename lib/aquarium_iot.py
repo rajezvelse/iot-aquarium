@@ -21,7 +21,7 @@ REBOOT_TIMES = [6, 9, 21.30, 23.30]
 FEEDING_TIMES = [8, 18]
 FEEDING_BUFFER = 2  # Hours
 LIGHT_ON_TIME = 13
-LIGHT_OFF_TIME = 21
+LIGHT_OFF_TIME = 20
 
 CO2_ON_TIME = 10
 CO2_OFF_TIME = 21
@@ -117,7 +117,7 @@ def servo_360(pin):
     p.start(0)  # Starts running PWM on the pin and sets it to 0
 
     p.ChangeDutyCycle(7.4)
-    sleep(2.2)
+    sleep(2.1)
     p.stop()
     sleep(200 / 1000)  # 100 millisecods
     GPIO.setup(pin, GPIO.IN)
@@ -133,8 +133,8 @@ def init_feeding_sequence():
     on(FEEDER_SERVO_SWITCH)
     sleep(1)
     servo_360(FEEDER_SERVO)
-    sleep(5)
-    servo_360(FEEDER_SERVO)
+    # sleep(5)
+    # servo_360(FEEDER_SERVO)
     sleep(500 / 1000)  # 100 millisecods
     off(FEEDER_SERVO_SWITCH)
 
