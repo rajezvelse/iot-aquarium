@@ -54,6 +54,7 @@ def log(msg, type=None):
 
 def reboot():
     log("Running reboot")
+    clean()
     os.system("sudo reboot")
 
 
