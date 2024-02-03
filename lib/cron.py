@@ -4,8 +4,8 @@ import math
 from time import sleep
 
 schedules = [
-    # (aiot.CO2_ON_TIME, aiot.switch_on_co2, aiot.CO2_OFF_TIME),
-    # (aiot.CO2_OFF_TIME, aiot.switch_off_co2, 23.59),
+    (aiot.CO2_ON_TIME, aiot.switch_on_co2, aiot.CO2_OFF_TIME),
+    (aiot.CO2_OFF_TIME, aiot.switch_off_co2, 23.59),
     (aiot.LIGHT_ON_TIME, aiot.switch_on_light, aiot.LIGHT_OFF_TIME),
     (aiot.LIGHT_OFF_TIME, aiot.switch_off_light, 23.59),
     (
