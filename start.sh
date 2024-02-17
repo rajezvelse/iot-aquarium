@@ -5,7 +5,7 @@
 
 # echo "Starting the scriptaquarium_iot.py"
 
-# cd /home/pi/iot/
+# cd /media/pi/PENDRIVE8GB/iot/
 # python3 aquarium_iot.py
 
 

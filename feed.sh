@@ -4,7 +4,7 @@
 
 echo "Starting the script $PWD/feed.py"
 
-export APP_DIR=/home/pi/iot/
+export APP_DIR=/media/pi/PENDRIVE8GB/iot/
 export PYTHONPATH=$APP_DIR
 cd $APP_DIR
 

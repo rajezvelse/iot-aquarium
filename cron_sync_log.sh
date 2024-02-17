@@ -2,7 +2,7 @@
 
 echo "Starting the cron_sync_log job"
 
-export APP_DIR=/home/pi/iot/
+export APP_DIR=/media/pi/PENDRIVE8GB/iot/
 export PYTHONPATH=$APP_DIR
 cd $APP_DIR
 
