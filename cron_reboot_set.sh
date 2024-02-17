@@ -10,4 +10,4 @@ python lib/cron_reboot_set.py
 
 sleep 120
 
-python lib/cron.py
+# python lib/cron.py
